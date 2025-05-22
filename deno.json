@@ -1,4 +1,11 @@
 {
+  "imports": {
+    "oak": "https://deno.land/x/oak@v17.1.4/mod.ts",
+    "cors": "https://deno.land/x/cors@v1.2.2/mod.ts",
+    "bcrypt": "https://deno.land/x/bcrypt@v0.4.1/mod.ts",
+    "djwt": "https://deno.land/x/djwt@v3.0.1/mod.ts",
+    "postgres": "https://deno.land/x/postgres@v0.17.0/mod.ts"
+  },
   "tasks": {
     "start": "deno run --allow-net --allow-read --allow-write --allow-env back_server.ts",
     "dev": "deno run --allow-net --allow-read --allow-write --allow-env --watch back_server.ts",
@@ -6,16 +13,19 @@
     "init-teams": "deno run --allow-net --allow-read --allow-env scripts/pg_initTeams.ts",
     "test-db": "deno run --allow-net --allow-read --allow-env scripts/test_pg_connection.ts"
   },
+  "compilerOptions": {
+    "allowJs": true,
+    "lib": ["deno.window"],
+    "strict": true
+  },
   "fmt": {
     "files": {
-      "include": ["*.ts", "**/*.ts"],
-      "exclude": ["**/*.d.ts"]
+      "include": ["src/", "scripts/", "*.ts"]
     }
   },
   "lint": {
     "files": {
-      "include": ["*.ts", "**/*.ts"],
-      "exclude": ["**/*.d.ts"]
+      "include": ["src/", "scripts/", "*.ts"]
     }
   }
 }
