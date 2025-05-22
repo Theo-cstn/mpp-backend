@@ -1,0 +1,21 @@
+{
+  "tasks": {
+    "start": "deno run --allow-net --allow-read --allow-write --allow-env back_server.ts",
+    "dev": "deno run --allow-net --allow-read --allow-write --allow-env --watch back_server.ts",
+    "init-db": "deno run --allow-net --allow-read --allow-env scripts/init_postgres.ts",
+    "init-teams": "deno run --allow-net --allow-read --allow-env scripts/pg_initTeams.ts",
+    "test-db": "deno run --allow-net --allow-read --allow-env scripts/test_pg_connection.ts"
+  },
+  "fmt": {
+    "files": {
+      "include": ["*.ts", "**/*.ts"],
+      "exclude": ["**/*.d.ts"]
+    }
+  },
+  "lint": {
+    "files": {
+      "include": ["*.ts", "**/*.ts"],
+      "exclude": ["**/*.d.ts"]
+    }
+  }
+}

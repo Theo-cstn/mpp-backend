@@ -1,0 +1,29 @@
+# Environment variables
+.env
+
+# Database files
+*.db
+*.db.backup
+*.sqlite
+
+# Logs
+*.log
+
+# Deno cache
+.deno/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Certificates (dev only)
+certificates/
+*.pem
+*.key
+
+# Cookies (dev only)
+*cookies.txt*
