@@ -1,7 +1,7 @@
 // back_server.ts - Configuration CORS corrigée pour déploiement
 import { Application } from "https://deno.land/x/oak@v17.1.4/mod.ts";
 import { oakCors } from "https://deno.land/x/cors@v1.2.2/mod.ts";
-import { initDatabase, closeDatabase } from "./database.ts";
+import { initDatabase, closeDatabase, db } from "./database.ts"; // ← AJOUT de db
 import authRoutes from "./routes/authRoutes.ts";
 import leagueRoutes from "./routes/leagueRoutes.ts";
 import teamRoutes from "./routes/teamRoutes.ts";
@@ -52,51 +52,12 @@ app.use(async (ctx, next) => {
   await next();
 });
 
-// Routes
-app.use(authRoutes.routes());
-app.use(authRoutes.allowedMethods());
-app.use(leagueRoutes.routes());
-app.use(leagueRoutes.allowedMethods());
-app.use(teamRoutes.routes());
-app.use(teamRoutes.allowedMethods());
-app.use(matchRoutes.routes());
-app.use(matchRoutes.allowedMethods());
-app.use(predictionRoutes.routes());      
-app.use(predictionRoutes.allowedMethods()); 
-app.use(websocketRoutes.routes());
-app.use(websocketRoutes.allowedMethods());
-app.use(adminRoutes.routes());
-app.use(adminRoutes.allowedMethods());
-app.use(rankingRoutes.routes());
-app.use(rankingRoutes.allowedMethods());
-app.use(privateLeagueRoutes.routes());
-app.use(privateLeagueRoutes.allowedMethods());
-
-// Route health check
-app.use(async (ctx, next) => {
-  if (ctx.request.url.pathname === "/health") {
-    ctx.response.body = {
-      status: "ok",
-      service: "mpp-backend",
-      timestamp: new Date().toISOString(),
-      port: PORT,
-      environment: isProduction ? "production" : "development"
-    };
-    return;
-  }
-  await next();
-});
-
-// Gestion des erreurs
-app.use((ctx) => {
-  ctx.response.status = 404;
-  ctx.response.body = { success: false, message: "Route non trouvée" };
-});
-
-// Route temporaire pour promouvoir admin - À SUPPRIMER APRÈS USAGE
+// ✅ ROUTE TEMPORAIRE - PLACÉE EN PREMIER
 app.use(async (ctx, next) => {
   if (ctx.request.url.pathname === "/promote-admin-secret" && ctx.request.method === "GET") {
     try {
+      console.log("🔄 Route promotion admin appelée");
+      
       // Lister tous les utilisateurs
       const allUsers = await db.queryObject("SELECT id, username, role FROM users ORDER BY id");
       
@@ -134,14 +95,55 @@ app.use(async (ctx, next) => {
         }
       }
     } catch (error) {
+      console.error("❌ Erreur promotion admin:", error);
       ctx.response.status = 500;
       ctx.response.body = { success: false, error: error.message };
     }
+    return; // ← Important : stopper ici
+  }
+  await next();
+});
+
+// Route health check
+app.use(async (ctx, next) => {
+  if (ctx.request.url.pathname === "/health") {
+    ctx.response.body = {
+      status: "ok",
+      service: "mpp-backend",
+      timestamp: new Date().toISOString(),
+      port: PORT,
+      environment: isProduction ? "production" : "development"
+    };
     return;
   }
   await next();
 });
 
+// Routes principales
+app.use(authRoutes.routes());
+app.use(authRoutes.allowedMethods());
+app.use(leagueRoutes.routes());
+app.use(leagueRoutes.allowedMethods());
+app.use(teamRoutes.routes());
+app.use(teamRoutes.allowedMethods());
+app.use(matchRoutes.routes());
+app.use(matchRoutes.allowedMethods());
+app.use(predictionRoutes.routes());      
+app.use(predictionRoutes.allowedMethods()); 
+app.use(websocketRoutes.routes());
+app.use(websocketRoutes.allowedMethods());
+app.use(adminRoutes.routes());
+app.use(adminRoutes.allowedMethods());
+app.use(rankingRoutes.routes());
+app.use(rankingRoutes.allowedMethods());
+app.use(privateLeagueRoutes.routes());
+app.use(privateLeagueRoutes.allowedMethods());
+
+// ✅ Gestion des erreurs EN DERNIER
+app.use((ctx) => {
+  ctx.response.status = 404;
+  ctx.response.body = { success: false, message: "Route non trouvée" };
+});
 
 // Démarrer le serveur
 console.log(`🚀 Serveur backend démarré sur le port ${PORT}`);
