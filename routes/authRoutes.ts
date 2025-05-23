@@ -1,4 +1,4 @@
-// routes/authRoutes.ts - URL de logout dynamique
+// routes/authRoutes.ts - Version corrigée pour la redirection logout
 import { Router } from "https://deno.land/x/oak@v17.1.4/mod.ts";
 import { authController } from "../controllers/authController.ts";
 import { verify } from "https://deno.land/x/djwt@v3.0.1/mod.ts";
@@ -28,6 +28,7 @@ router
   .get("/logout", async (ctx) => {
     console.log("Logout request received");
     
+    // Supprimer le token
     ctx.cookies.delete("token");
     
     ctx.cookies.set("token", "", {
@@ -37,15 +38,14 @@ router
       path: "/",
     });
     
-    // URL de redirection dynamique selon l'environnement
-    const isProduction = Deno.env.get("NODE_ENV") === "production";
-    const frontendURL = isProduction 
-      ? "http://mpp-frontend.cluster-ig3.igpolytech.fr:3000/login.html"
-      : "http://localhost:3000/login.html";
+    // 🚀 FIX: Redirection dynamique selon l'environnement
+    const frontendUrl = Deno.env.get("FRONTEND_URL") || "http://localhost:3000";
+    const redirectUrl = `${frontendUrl}/login.html`;
     
-    ctx.response.headers.set("Location", frontendURL);
+    ctx.response.headers.set("Location", redirectUrl);
     ctx.response.status = 302;
-    console.log(`User logged out, redirecting to ${frontendURL}`);
+    
+    console.log(`User logged out, redirecting to: ${redirectUrl}`);
   });
 
 export default router;
