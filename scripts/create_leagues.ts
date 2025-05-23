@@ -7,12 +7,12 @@ async function createLeagues() {
   try {
     // Championnats avec IDs fixes pour correspondre aux scripts d'équipes
     const leagues = [
-      { id: 1, name: "Ligue 1", country: "France", season: "2023-2024", is_cup: false, active: true },
-      { id: 2, name: "Premier League", country: "Angleterre", season: "2023-2024", is_cup: false, active: true },
-      { id: 3, name: "La Liga", country: "Espagne", season: "2023-2024", is_cup: false, active: true },
-      { id: 4, name: "Serie A", country: "Italie", season: "2023-2024", is_cup: false, active: true },
-      { id: 5, name: "Bundesliga", country: "Allemagne", season: "2023-2024", is_cup: false, active: true },
-      { id: 6, name: "UEFA Champions League", country: null, season: "2023-2024", is_cup: true, active: true }
+      { id: 1, name: "Ligue 1", country: "France", season: "2024-2025", is_cup: false, active: true },
+      { id: 2, name: "Premier League", country: "Angleterre", season: "2024-2025", is_cup: false, active: true },
+      { id: 3, name: "La Liga", country: "Espagne", season: "2024-2025", is_cup: false, active: true },
+      { id: 4, name: "Serie A", country: "Italie", season: "2024-2025", is_cup: false, active: true },
+      { id: 5, name: "Bundesliga", country: "Allemagne", season: "2024-2025", is_cup: false, active: true },
+      { id: 6, name: "UEFA Champions League", country: null, season: "2024-2025", is_cup: true, active: true }
     ];
     
     console.log("📋 Création de", leagues.length, "championnats...");
