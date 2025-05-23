@@ -16,14 +16,11 @@ COPY . .
 # Cache de l'application principale
 RUN deno cache --lock=deno.lock back_server.ts || deno cache back_server.ts
 
-# Exposer le port
-EXPOSE 8000
-
-# Health check pour Dokku (VERSION CORRIGÉE)
+# Health check pour Dokku (utilise la variable PORT de Dokku)
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD deno eval 'try { const response = await fetch("http://localhost:8000/health"); if (response.ok) { console.log("Health check passed"); Deno.exit(0); } else { console.log("Health check failed"); Deno.exit(1); } } catch (error) { console.log("Health check error:", error.message); Deno.exit(1); }'
+  CMD deno eval 'const port = Deno.env.get("PORT") || "8000"; try { const response = await fetch(`http://localhost:${port}/health`); if (response.ok) { console.log("Health check passed"); Deno.exit(0); } else { console.log("Health check failed"); Deno.exit(1); } } catch (error) { console.log("Health check error:", error.message); Deno.exit(1); }'
 
-# Commande de démarrage
+# Commande de démarrage (sans port hardcodé)
 CMD ["deno", "run", \
      "--allow-net", \
      "--allow-read", \

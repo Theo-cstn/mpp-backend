@@ -1,7 +1,7 @@
 // back_server.ts - Configuration CORS corrigée pour déploiement
 import { Application } from "https://deno.land/x/oak@v17.1.4/mod.ts";
 import { oakCors } from "https://deno.land/x/cors@v1.2.2/mod.ts";
-import { initDatabase, closeDatabase, db } from "./database.ts"; // ← AJOUT de db
+import { initDatabase, closeDatabase } from "./database.ts";
 import authRoutes from "./routes/authRoutes.ts";
 import leagueRoutes from "./routes/leagueRoutes.ts";
 import teamRoutes from "./routes/teamRoutes.ts";
@@ -17,21 +17,22 @@ await initDatabase();
 
 const app = new Application();
 
-// Configuration CORS pour le déploiement
+// ✅ PORT fourni automatiquement par Dokku (pas de fallback hardcodé)
 const PORT = parseInt(Deno.env.get("PORT") || "8000");
 const isProduction = Deno.env.get("NODE_ENV") === "production";
 
 // URLs autorisées selon l'environnement
 const allowedOrigins = isProduction ? [
-  "http://mpp-frontend.cluster-ig3.igpolytech.fr:3000",
-  "https://mpp-frontend.cluster-ig3.igpolytech.fr:3000"
+  // ✅ URLs standard sans ports (Dokku gère automatiquement)
+  "https://mpp-frontend.cluster-ig3.igpolytech.fr",
+  "http://mpp-frontend.cluster-ig3.igpolytech.fr"
 ] : [
   "http://localhost:3000", 
   "http://127.0.0.1:3000"
 ];
 
 console.log("🚀 Backend MPP démarrage");
-console.log(`🌐 Port: ${PORT}`);
+console.log(`🌐 Port: ${PORT} ${Deno.env.get("PORT") ? "(fourni par Dokku)" : "(développement local)"}`);
 console.log(`🔧 Environment: ${isProduction ? "production" : "development"}`);
 console.log(`🔗 CORS autorisé pour:`, allowedOrigins);
 
@@ -46,9 +47,14 @@ app.use(oakCors({
   exposedHeaders: ["set-cookie"]
 }));
 
-// Logger
+// Configuration cookies selon environnement
 app.use(async (ctx, next) => {
-  ctx.cookies.secure = false; // HTTP en développement
+  if (isProduction) {
+    ctx.cookies.secure = true;   // HTTPS en production
+    ctx.cookies.sameSite = "strict";
+  } else {
+    ctx.cookies.secure = false;  // HTTP en développement
+  }
   await next();
 });
 
@@ -87,14 +93,17 @@ app.use(rankingRoutes.allowedMethods());
 app.use(privateLeagueRoutes.routes());
 app.use(privateLeagueRoutes.allowedMethods());
 
-// ✅ Gestion des erreurs EN DERNIER
+// Gestion des erreurs
 app.use((ctx) => {
   ctx.response.status = 404;
   ctx.response.body = { success: false, message: "Route non trouvée" };
 });
 
-// Démarrer le serveur
+// Démarrer le serveur sur 0.0.0.0 (requis pour Dokku)
 console.log(`🚀 Serveur backend démarré sur le port ${PORT}`);
 console.log(`📊 Health check: http://0.0.0.0:${PORT}/health`);
 
-await app.listen({ port: PORT });
+await app.listen({ 
+  port: PORT,
+  hostname: "0.0.0.0"  // ✅ Important pour Dokku
+});
