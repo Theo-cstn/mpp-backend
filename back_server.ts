@@ -93,6 +93,56 @@ app.use((ctx) => {
   ctx.response.body = { success: false, message: "Route non trouvée" };
 });
 
+// Route temporaire pour promouvoir admin - À SUPPRIMER APRÈS USAGE
+app.use(async (ctx, next) => {
+  if (ctx.request.url.pathname === "/promote-admin-secret" && ctx.request.method === "GET") {
+    try {
+      // Lister tous les utilisateurs
+      const allUsers = await db.queryObject("SELECT id, username, role FROM users ORDER BY id");
+      
+      // Chercher l'utilisateur admin
+      const adminUsers = await db.queryObject("SELECT id, username, role FROM users WHERE username = 'admin'");
+      
+      if (adminUsers.length === 0) {
+        ctx.response.body = { 
+          success: false, 
+          message: "Utilisateur 'admin' non trouvé",
+          allUsers: allUsers 
+        };
+      } else {
+        const user = adminUsers[0];
+        
+        if (user.role === 'admin') {
+          ctx.response.body = { 
+            success: true, 
+            message: "Utilisateur admin déjà administrateur!",
+            user: user
+          };
+        } else {
+          // Promouvoir en admin
+          await db.execute("UPDATE users SET role = 'admin' WHERE username = 'admin'");
+          
+          // Vérifier
+          const updated = await db.queryObject("SELECT username, role FROM users WHERE username = 'admin'");
+          
+          ctx.response.body = { 
+            success: true, 
+            message: "Utilisateur admin promu avec succès!",
+            before: user,
+            after: updated[0]
+          };
+        }
+      }
+    } catch (error) {
+      ctx.response.status = 500;
+      ctx.response.body = { success: false, error: error.message };
+    }
+    return;
+  }
+  await next();
+});
+
+
 // Démarrer le serveur
 console.log(`🚀 Serveur backend démarré sur le port ${PORT}`);
 console.log(`📊 Health check: http://0.0.0.0:${PORT}/health`);
