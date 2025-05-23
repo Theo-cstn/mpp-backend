@@ -52,58 +52,6 @@ app.use(async (ctx, next) => {
   await next();
 });
 
-// ✅ ROUTE TEMPORAIRE - PLACÉE EN PREMIER
-app.use(async (ctx, next) => {
-  if (ctx.request.url.pathname === "/promote-admin-secret" && ctx.request.method === "GET") {
-    try {
-      console.log("🔄 Route promotion admin appelée");
-      
-      // Lister tous les utilisateurs
-      const allUsers = await db.queryObject("SELECT id, username, role FROM users ORDER BY id");
-      
-      // Chercher l'utilisateur admin
-      const adminUsers = await db.queryObject("SELECT id, username, role FROM users WHERE username = 'admin'");
-      
-      if (adminUsers.length === 0) {
-        ctx.response.body = { 
-          success: false, 
-          message: "Utilisateur 'admin' non trouvé",
-          allUsers: allUsers 
-        };
-      } else {
-        const user = adminUsers[0];
-        
-        if (user.role === 'admin') {
-          ctx.response.body = { 
-            success: true, 
-            message: "Utilisateur admin déjà administrateur!",
-            user: user
-          };
-        } else {
-          // Promouvoir en admin
-          await db.execute("UPDATE users SET role = 'admin' WHERE username = 'admin'");
-          
-          // Vérifier
-          const updated = await db.queryObject("SELECT username, role FROM users WHERE username = 'admin'");
-          
-          ctx.response.body = { 
-            success: true, 
-            message: "Utilisateur admin promu avec succès!",
-            before: user,
-            after: updated[0]
-          };
-        }
-      }
-    } catch (error) {
-      console.error("❌ Erreur promotion admin:", error);
-      ctx.response.status = 500;
-      ctx.response.body = { success: false, error: error.message };
-    }
-    return; // ← Important : stopper ici
-  }
-  await next();
-});
-
 // Route health check
 app.use(async (ctx, next) => {
   if (ctx.request.url.pathname === "/health") {
