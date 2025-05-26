@@ -39,7 +39,7 @@ export const authController = {
       
       const userId = await userRepository.createUser(username, passwordHash);
       
-      // Créer le JWT - CORRECTION: convertir BigInt en Number
+      // Créer le JWT
       const payload = {
         sub: username,
         id: typeof userId === 'bigint' ? Number(userId) : userId, // Conversion BigInt -> Number

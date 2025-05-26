@@ -17,13 +17,11 @@ await initDatabase();
 
 const app = new Application();
 
-// ✅ PORT fourni automatiquement par Dokku (pas de fallback hardcodé)
 const PORT = parseInt(Deno.env.get("PORT") || "8000");
 const isProduction = Deno.env.get("NODE_ENV") === "production";
 
 // URLs autorisées selon l'environnement
 const allowedOrigins = isProduction ? [
-  // ✅ URLs standard sans ports (Dokku gère automatiquement)
   "https://mpp-frontend.cluster-ig3.igpolytech.fr",
   "http://mpp-frontend.cluster-ig3.igpolytech.fr"
 ] : [
@@ -105,5 +103,5 @@ console.log(`📊 Health check: http://0.0.0.0:${PORT}/health`);
 
 await app.listen({ 
   port: PORT,
-  hostname: "0.0.0.0"  // ✅ Important pour Dokku
+  hostname: "0.0.0.0"  
 });

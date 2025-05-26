@@ -5,7 +5,7 @@ import { authMiddleware, adminMiddleware } from "../middlewares/authMiddleware.t
 
 const router = new Router();
 
-// Routes publiques (pas besoin d'être connecté)
+// Routes publiques 
 router
   .get("/matches", matchController.getAllMatches)
   .get("/leagues/:leagueId/matches", matchController.getMatchesByLeague)

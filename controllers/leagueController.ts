@@ -1,6 +1,6 @@
 // controllers/leagueController.ts
 import { Context } from "https://deno.land/x/oak@v17.1.4/mod.ts";
-import { leagueRepository } from "../models/league.ts";
+import { leagueRepository } from "../ models/league.ts";
 
 export const leagueController = {
   // Récupérer tous les championnats
